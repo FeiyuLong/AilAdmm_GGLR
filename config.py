@@ -88,7 +88,7 @@ ALGORITHM_PARAMS = {
     "AIL-SVRG-ADMM": {
         "batch_size": 64,
         "step_multiplier": 1.35,
-        "tau": 0.40,
+        "tau": 0.10,
         "varrho": 3,
         "beta_y": 0.0,
         "p_min": 0.002,
