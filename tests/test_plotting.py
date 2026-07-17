@@ -42,6 +42,20 @@ def artificial_run(name: str, seed: int, scale: float) -> RunResult:
 
 
 class PlottingTests(unittest.TestCase):
+    def test_canonical_algorithm_name_is_preserved_as_curve_label(self) -> None:
+        run = artificial_run("AILSVRG-ADMM", 1, 1.0)
+        x_values, y_values = _iteration_values([run], "primal_residual")
+        figure, axis = plt.subplots()
+        try:
+            _draw_median_curve(
+                axis, x_values, y_values, label=run.name,
+                color=(0.0, 0.0, 1.0), linestyle="-", multiplier=1.0,
+                log_scale=False,
+            )
+            self.assertEqual(axis.lines[0].get_label(), "AILSVRG-ADMM")
+        finally:
+            plt.close(figure)
+
     def test_default_outputs_exclude_ifo_without_svg_raster_images(self) -> None:
         results = {
             "Method-A": [artificial_run("Method-A", 1, 1.0), artificial_run("Method-A", 2, 1.1)],
@@ -197,8 +211,9 @@ class PlottingTests(unittest.TestCase):
 class ResultSerializationTests(unittest.TestCase):
     def test_csv_writer_handles_iteration_checkpoint_field(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            path = write_run_csv(artificial_run("Method-A", 1, 1.0), temporary)
+            path = write_run_csv(artificial_run("AILSVRG-ADMM", 1, 1.0), temporary)
             self.assertTrue(path.is_file())
+            self.assertEqual(path.name, "ailsvrg_admm_seed_1.csv")
             rows = path.read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(rows), 5)
         self.assertTrue(rows[0].startswith("iteration,"))

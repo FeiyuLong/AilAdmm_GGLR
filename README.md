@@ -1,4 +1,4 @@
-# AIL-SVRG-ADMM：图引导稀疏 Logistic 回归实验
+# AILSVRG-ADMM：图引导稀疏 Logistic 回归实验
 
 本项目实现以下十种方法，用于求解
 
@@ -8,10 +8,12 @@
 \]
 
 - STOC-ADMM、SAG-ADMM、SAGA-ADMM、SVRG-ADMM、ASVRG-ADMM、SPIDER-ADMM；
-- AIL-SVRG-ADMM；
-- AIL-SVRG-ADMM-NoMom、AIL-SVRG-ADMM-Fixed-p、AIL-SVRG-ADMM-WithCorr。
+- AILSVRG-ADMM；
+- AILSVRG-ADMM-NoMom、AILSVRG-ADMM-Fixed-p、AILSVRG-ADMM-WithCorr。
 
-其中，`AIL-SVRG-ADMM-NoMom` 去除惯性外推，`AIL-SVRG-ADMM-Fixed-p` 使用成本匹配的固定快照刷新概率，`AIL-SVRG-ADMM-WithCorr` 保留旧版的 \(x\) 校正项。
+其中，`AILSVRG-ADMM-NoMom` 去除惯性外推，`AILSVRG-ADMM-Fixed-p` 使用成本匹配的固定快照刷新概率，`AILSVRG-ADMM-WithCorr` 保留旧版的 \(x\) 校正项。
+
+`--algorithms` 既接受完整算法名，也接受严格区分大小写的规范短名。短名仅由完整名称移除第一个 `-ADMM` 得到，例如 `SVRG`、`ASVRG`、`SPIDER`、`AILSVRG` 和 `AILSVRG-NoMom`；`ASVR`、`AIL`、`SPI` 或小写名称不会进行模糊匹配。短名在解析后立即转换为完整名称，因此日志、图例、CSV 和元数据始终显示完整算法名。重复输入的全名和短名会自动去重。
 
 代码兼容 Python 3.10，所有算法使用未缩放乘子。项目不包含参考工程中的额外 L2 正则。
 
@@ -106,7 +108,7 @@ python main.py --dry-run --data-dir datasets
 常用覆盖参数：
 
 ```text
---algorithms AIL-SVRG-ADMM AIL-SVRG-ADMM-NoMom
+--algorithms AILSVRG AILSVRG-NoMom
 --seeds 2026 2027 2028
 --max-iter 2000
 --eval-every 20

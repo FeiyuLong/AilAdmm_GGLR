@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 from scipy import sparse
 
-from algorithms.ail_svrg_admm import (
+from algorithms.ailsvrg_admm import (
     adaptive_probability,
     cost_matched_probability,
     resolve_p_min,
@@ -53,7 +53,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
             config["theta"] = 0.5
         if name == "SPIDER-ADMM":
             config["refresh_period"] = 2
-        if name.startswith("AIL-SVRG-ADMM"):
+        if name.startswith("AILSVRG-ADMM"):
             config.update(
                 {
                     "tau": 0.5,
@@ -62,11 +62,11 @@ class AlgorithmFormulaTests(unittest.TestCase):
                     "p_min": "inverse_n",
                 }
             )
-        if name == "AIL-SVRG-ADMM-NoMom":
+        if name == "AILSVRG-ADMM-NoMom":
             config["tau"] = 0.0
-        if name == "AIL-SVRG-ADMM-Fixed-p":
+        if name == "AILSVRG-ADMM-Fixed-p":
             config["fixed_probability"] = "cost_matched"
-        if name == "AIL-SVRG-ADMM-WithCorr":
+        if name == "AILSVRG-ADMM-WithCorr":
             config["enable_correction"] = True
         return config
 
@@ -89,15 +89,15 @@ class AlgorithmFormulaTests(unittest.TestCase):
                 self.assertTrue(np.isfinite(result.test_logistic_loss).all())
                 self.assertTrue(np.all(np.diff(result.algorithm_time) >= 0.0))
                 self.assertTrue(np.all(np.diff(result.ifo_count) >= 0))
-                if name == "AIL-SVRG-ADMM-NoMom":
+                if name == "AILSVRG-ADMM-NoMom":
                     self.assertEqual(result.metadata["tau"], 0.0)
-                if name == "AIL-SVRG-ADMM-Fixed-p":
+                if name == "AILSVRG-ADMM-Fixed-p":
                     self.assertIsNotNone(result.metadata["fixed_probability"])
-                if name == "AIL-SVRG-ADMM-WithCorr":
+                if name == "AILSVRG-ADMM-WithCorr":
                     self.assertTrue(result.metadata["enable_correction"])
-                if name.startswith("AIL-SVRG-ADMM") and name != "AIL-SVRG-ADMM-WithCorr":
+                if name.startswith("AILSVRG-ADMM") and name != "AILSVRG-ADMM-WithCorr":
                     self.assertFalse(result.metadata["enable_correction"])
-                if name.startswith("AIL-SVRG-ADMM"):
+                if name.startswith("AILSVRG-ADMM"):
                     self.assertEqual(result.metadata["p_min_setting"], "inverse_n")
                     self.assertAlmostEqual(result.metadata["p_min"], 1.0 / self.X.shape[0])
 
@@ -131,7 +131,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                 self.assertTrue(np.isfinite(result.kkt_residual).all())
                 self.assertTrue(np.isfinite(result.x_final).all())
 
-    def test_ail_svrg_ablation_common_parameters_match_main_algorithm(self) -> None:
+    def test_ailsvrg_ablation_common_parameters_match_main_algorithm(self) -> None:
         shared_keys = (
             "batch_size",
             "step_multiplier",
@@ -139,26 +139,26 @@ class AlgorithmFormulaTests(unittest.TestCase):
             "beta_y",
             "p_min",
         )
-        main = ALGORITHM_PARAMS["AIL-SVRG-ADMM"]
+        main = ALGORITHM_PARAMS["AILSVRG-ADMM"]
         for name in (
-            "AIL-SVRG-ADMM-NoMom",
-            "AIL-SVRG-ADMM-Fixed-p",
-            "AIL-SVRG-ADMM-WithCorr",
+            "AILSVRG-ADMM-NoMom",
+            "AILSVRG-ADMM-Fixed-p",
+            "AILSVRG-ADMM-WithCorr",
         ):
             with self.subTest(algorithm=name):
                 for key in shared_keys:
                     self.assertEqual(ALGORITHM_PARAMS[name][key], main[key])
         self.assertEqual(main["tau"], 0.0)
-        self.assertEqual(ALGORITHM_PARAMS["AIL-SVRG-ADMM-NoMom"]["tau"], 0.0)
-        self.assertEqual(ALGORITHM_PARAMS["AIL-SVRG-ADMM-Fixed-p"]["tau"], main["tau"])
-        self.assertEqual(ALGORITHM_PARAMS["AIL-SVRG-ADMM-WithCorr"]["tau"], main["tau"])
+        self.assertEqual(ALGORITHM_PARAMS["AILSVRG-ADMM-NoMom"]["tau"], 0.0)
+        self.assertEqual(ALGORITHM_PARAMS["AILSVRG-ADMM-Fixed-p"]["tau"], main["tau"])
+        self.assertEqual(ALGORITHM_PARAMS["AILSVRG-ADMM-WithCorr"]["tau"], main["tau"])
         self.assertNotIn("fixed_probability", main)
         self.assertNotIn("enable_correction", main)
         self.assertEqual(
-            ALGORITHM_PARAMS["AIL-SVRG-ADMM-Fixed-p"]["fixed_probability"],
+            ALGORITHM_PARAMS["AILSVRG-ADMM-Fixed-p"]["fixed_probability"],
             "cost_matched",
         )
-        self.assertTrue(ALGORITHM_PARAMS["AIL-SVRG-ADMM-WithCorr"]["enable_correction"])
+        self.assertTrue(ALGORITHM_PARAMS["AILSVRG-ADMM-WithCorr"]["enable_correction"])
 
     def test_nonfinite_update_fails_with_context(self) -> None:
         with self.assertRaisesRegex(
@@ -204,7 +204,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "p_min"):
                     resolve_p_min(setting, n=10, batch_size=4)
 
-    def _expected_ail_svrg_first_step(
+    def _expected_ailsvrg_first_step(
         self, config: dict[str, object], *, enable_correction: bool
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         x0 = np.zeros(self.X.shape[1])
@@ -233,11 +233,11 @@ class AlgorithmFormulaTests(unittest.TestCase):
         dual1 = dual0 + config["rho"] * (np.asarray(self.D @ x1).reshape(-1) - y1)
         return x1, y1, dual1
 
-    def test_uncorrected_ail_svrg_variants_match_modified_iteration(self) -> None:
+    def test_uncorrected_ailsvrg_variants_match_modified_iteration(self) -> None:
         for name in (
-            "AIL-SVRG-ADMM",
-            "AIL-SVRG-ADMM-NoMom",
-            "AIL-SVRG-ADMM-Fixed-p",
+            "AILSVRG-ADMM",
+            "AILSVRG-ADMM-NoMom",
+            "AILSVRG-ADMM-Fixed-p",
         ):
             with self.subTest(algorithm=name):
                 config = self._config(name)
@@ -252,7 +252,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                         "p_min": 1.0,
                     }
                 )
-                if name == "AIL-SVRG-ADMM-NoMom":
+                if name == "AILSVRG-ADMM-NoMom":
                     config["tau"] = 0.0
                 result = ALGORITHM_REGISTRY[name](
                     self.X,
@@ -265,7 +265,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                     11,
                     name=name,
                 )
-                x1, y1, dual1 = self._expected_ail_svrg_first_step(
+                x1, y1, dual1 = self._expected_ailsvrg_first_step(
                     config, enable_correction=False
                 )
 
@@ -274,7 +274,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                 np.testing.assert_allclose(result.dual_final, dual1, rtol=0.0, atol=1.0e-14)
 
     def test_with_corr_ablation_matches_previous_correction(self) -> None:
-        config = self._config("AIL-SVRG-ADMM-WithCorr")
+        config = self._config("AILSVRG-ADMM-WithCorr")
         config.update(
             {
                 "max_iter": 1,
@@ -286,7 +286,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
                 "p_min": 1.0,
             }
         )
-        result = ALGORITHM_REGISTRY["AIL-SVRG-ADMM-WithCorr"](
+        result = ALGORITHM_REGISTRY["AILSVRG-ADMM-WithCorr"](
             self.X,
             self.labels,
             self.X,
@@ -295,18 +295,18 @@ class AlgorithmFormulaTests(unittest.TestCase):
             self.f_star,
             config,
             11,
-            name="AIL-SVRG-ADMM-WithCorr",
+            name="AILSVRG-ADMM-WithCorr",
         )
-        x1, y1, dual1 = self._expected_ail_svrg_first_step(config, enable_correction=True)
+        x1, y1, dual1 = self._expected_ailsvrg_first_step(config, enable_correction=True)
 
         np.testing.assert_allclose(result.x_final, x1, rtol=0.0, atol=1.0e-14)
         np.testing.assert_allclose(result.y_final, y1, rtol=0.0, atol=1.0e-14)
         np.testing.assert_allclose(result.dual_final, dual1, rtol=0.0, atol=1.0e-14)
 
     def test_cost_matched_ablation_uses_configured_p_min(self) -> None:
-        config = self._config("AIL-SVRG-ADMM-Fixed-p")
+        config = self._config("AILSVRG-ADMM-Fixed-p")
         config.update({"max_iter": 8, "p_min": 0.2})
-        result = ALGORITHM_REGISTRY["AIL-SVRG-ADMM-Fixed-p"](
+        result = ALGORITHM_REGISTRY["AILSVRG-ADMM-Fixed-p"](
             self.X,
             self.labels,
             self.X,
@@ -315,7 +315,7 @@ class AlgorithmFormulaTests(unittest.TestCase):
             self.f_star,
             config,
             11,
-            name="AIL-SVRG-ADMM-Fixed-p",
+            name="AILSVRG-ADMM-Fixed-p",
         )
         self.assertAlmostEqual(result.metadata["p_min"], 0.2)
         self.assertAlmostEqual(

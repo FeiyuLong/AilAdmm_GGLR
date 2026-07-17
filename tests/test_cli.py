@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 import unittest
 
 import numpy as np
@@ -22,11 +23,37 @@ class CliTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 main(["--dry-run", "--plot-formats", "png"])
 
-    def test_renamed_ail_svrg_cli_name_is_required(self) -> None:
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            self.assertEqual(main(["--dry-run", "--algorithms", "AIL-SVRG-ADMM"]), 0)
-            with self.assertRaises(SystemExit):
-                main(["--dry-run", "--algorithms", "Ail-ADMM"])
+    def _dry_run_algorithms(self, *names: str) -> list[str]:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(main(["--dry-run", "--algorithms", *names]), 0)
+        return json.loads(output.getvalue())["algorithms"]
+
+    def test_full_names_and_exact_short_names_are_equivalent(self) -> None:
+        canonical = ["SVRG-ADMM", "ASVRG-ADMM", "SPIDER-ADMM"]
+        self.assertEqual(self._dry_run_algorithms(*canonical), canonical)
+        self.assertEqual(self._dry_run_algorithms("SVRG", "ASVRG", "SPIDER"), canonical)
+
+    def test_ailsvrg_short_names_resolve_to_canonical_names(self) -> None:
+        short_names = ["AILSVRG", "AILSVRG-NoMom", "AILSVRG-Fixed-p", "AILSVRG-WithCorr"]
+        expected = [
+            "AILSVRG-ADMM", "AILSVRG-ADMM-NoMom",
+            "AILSVRG-ADMM-Fixed-p", "AILSVRG-ADMM-WithCorr",
+        ]
+        self.assertEqual(self._dry_run_algorithms(*short_names), expected)
+
+    def test_partial_lowercase_unknown_and_legacy_names_are_rejected(self) -> None:
+        invalid = ("ASVR", "AIL", "SPI", "svrg", "ailsvrg", "UNKNOWN", "AIL" + "-SVRG-ADMM")
+        for name in invalid:
+            with self.subTest(name=name), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    main(["--dry-run", "--algorithms", name])
+
+    def test_aliases_are_deduplicated_in_first_seen_order(self) -> None:
+        self.assertEqual(
+            self._dry_run_algorithms("SPIDER", "SVRG", "SPIDER-ADMM", "SVRG-ADMM"),
+            ["SPIDER-ADMM", "SVRG-ADMM"],
+        )
 
     def test_results_cleanup_removes_all_prior_artifacts(self) -> None:
         import tempfile

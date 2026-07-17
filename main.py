@@ -17,10 +17,10 @@ from scipy import sparse
 from scipy.sparse.linalg import ArpackNoConvergence, eigsh
 
 from algorithms import (
-    run_ail_svrg_admm,
-    run_ail_svrg_admm_fixed_p,
-    run_ail_svrg_admm_with_corr,
-    run_ail_svrg_admm_no_mom,
+    run_ailsvrg_admm,
+    run_ailsvrg_admm_fixed_p,
+    run_ailsvrg_admm_with_corr,
+    run_ailsvrg_admm_no_mom,
     run_asvrg_admm,
     run_sag_admm,
     run_saga_admm,
@@ -58,11 +58,27 @@ ALGORITHM_REGISTRY: dict[str, Algorithm] = {
     "SVRG-ADMM": run_svrg_admm,
     "ASVRG-ADMM": run_asvrg_admm,
     "SPIDER-ADMM": run_spider_admm,
-    "AIL-SVRG-ADMM": run_ail_svrg_admm,
-    "AIL-SVRG-ADMM-NoMom": run_ail_svrg_admm_no_mom,
-    "AIL-SVRG-ADMM-Fixed-p": run_ail_svrg_admm_fixed_p,
-    "AIL-SVRG-ADMM-WithCorr": run_ail_svrg_admm_with_corr,
+    "AILSVRG-ADMM": run_ailsvrg_admm,
+    "AILSVRG-ADMM-NoMom": run_ailsvrg_admm_no_mom,
+    "AILSVRG-ADMM-Fixed-p": run_ailsvrg_admm_fixed_p,
+    "AILSVRG-ADMM-WithCorr": run_ailsvrg_admm_with_corr,
 }
+ALGORITHM_ALIASES = {
+    alias: canonical
+    for canonical in ALGORITHM_ORDER
+    for alias in (canonical, canonical.replace("-ADMM", "", 1))
+}
+
+
+def _parse_algorithm_name(value: str) -> str:
+    try:
+        return ALGORITHM_ALIASES[value]
+    except KeyError as exc:
+        short_names = [name.replace("-ADMM", "", 1) for name in ALGORITHM_ORDER]
+        raise argparse.ArgumentTypeError(
+            f"unknown algorithm {value!r}; use a canonical name or exact short name: "
+            + ", ".join(short_names)
+        ) from exc
 
 
 def _spectral_squared_norm(
@@ -139,7 +155,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=Path("datasets"))
     parser.add_argument("--datasets", nargs="+", choices=list(DATASET_FILES), default=list(DATASET_FILES))
-    parser.add_argument("--algorithms", nargs="+", choices=ALGORITHM_ORDER, default=ALGORITHM_ORDER)
+    parser.add_argument(
+        "--algorithms", nargs="+", type=_parse_algorithm_name,
+        choices=ALGORITHM_ORDER, default=ALGORITHM_ORDER,
+    )
     parser.add_argument("--seeds", nargs="+", type=int, default=GLOBAL_SETTINGS["seeds"])
     parser.add_argument("--max-iter", type=int, default=GLOBAL_SETTINGS["max_iter"])
     parser.add_argument("--eval-every", type=int, default=GLOBAL_SETTINGS["eval_every"])
@@ -289,6 +308,7 @@ def run_dataset(args: argparse.Namespace, dataset_name: str) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    args.algorithms = list(dict.fromkeys(args.algorithms))
     if args.max_iter <= 0 or args.eval_every <= 0:
         raise SystemExit("--max-iter and --eval-every must be positive.")
     if args.dry_run:

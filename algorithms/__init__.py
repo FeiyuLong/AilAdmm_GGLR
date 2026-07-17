@@ -1,9 +1,9 @@
 """Algorithm entry points for the GGLR benchmark."""
 
-from .ail_svrg_admm import run_ail_svrg_admm
-from .ail_svrg_admm_fixed_p import run_ail_svrg_admm_fixed_p
-from .ail_svrg_admm_no_mom import run_ail_svrg_admm_no_mom
-from .ail_svrg_admm_with_corr import run_ail_svrg_admm_with_corr
+from .ailsvrg_admm import run_ailsvrg_admm
+from .ailsvrg_admm_fixed_p import run_ailsvrg_admm_fixed_p
+from .ailsvrg_admm_no_mom import run_ailsvrg_admm_no_mom
+from .ailsvrg_admm_with_corr import run_ailsvrg_admm_with_corr
 from .asvrg_admm import run_asvrg_admm
 from .sag_admm import run_sag_admm
 from .saga_admm import run_saga_admm
@@ -18,8 +18,8 @@ __all__ = [
     "run_svrg_admm",
     "run_asvrg_admm",
     "run_spider_admm",
-    "run_ail_svrg_admm",
-    "run_ail_svrg_admm_no_mom",
-    "run_ail_svrg_admm_fixed_p",
-    "run_ail_svrg_admm_with_corr",
+    "run_ailsvrg_admm",
+    "run_ailsvrg_admm_no_mom",
+    "run_ailsvrg_admm_fixed_p",
+    "run_ailsvrg_admm_with_corr",
 ]

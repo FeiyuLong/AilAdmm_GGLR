@@ -59,7 +59,7 @@ REFERENCE_CERTIFICATION = {
 
 
 # ``step_multiplier`` multiplies the data-dependent safe step calculated in main.py.
-# AIL-SVRG-ADMM ``p_min`` accepts "inverse_n", "batch_over_n", or a numeric value in (0, 1].
+# AILSVRG-ADMM ``p_min`` accepts "inverse_n", "batch_over_n", or a numeric value in (0, 1].
 ALGORITHM_PARAMS = {
     "STOC-ADMM": {"batch_size": 32, "step_multiplier": 1.0},
     "SAG-ADMM": {"batch_size": 1, "step_multiplier": 0.75},
@@ -85,7 +85,7 @@ ALGORITHM_PARAMS = {
         "step_multiplier": 1.0,
         "refresh_period": 100,
     },
-    "AIL-SVRG-ADMM": {
+    "AILSVRG-ADMM": {
         "batch_size": 64,
         "step_multiplier": 1.35,
         "tau": 0.10,
@@ -93,7 +93,7 @@ ALGORITHM_PARAMS = {
         "beta_y": 0.0,
         "p_min": 0.002,
     },
-    "AIL-SVRG-ADMM-NoMom": {
+    "AILSVRG-ADMM-NoMom": {
         "batch_size": 64,
         "step_multiplier": 1.0,
         "tau": 0.0,
@@ -101,7 +101,7 @@ ALGORITHM_PARAMS = {
         "beta_y": 0.0,
         "p_min": 0.002,
     },
-    "AIL-SVRG-ADMM-Fixed-p": {
+    "AILSVRG-ADMM-Fixed-p": {
         "batch_size": 64,
         "step_multiplier": 1.0,
         "tau": 0.0,
@@ -110,7 +110,7 @@ ALGORITHM_PARAMS = {
         "p_min": 0.002,
         "fixed_probability": "cost_matched",
     },
-    "AIL-SVRG-ADMM-WithCorr": {
+    "AILSVRG-ADMM-WithCorr": {
         "batch_size": 64,
         "step_multiplier": 1.0,
         "tau": 0.0,

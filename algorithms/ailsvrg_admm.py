@@ -1,4 +1,4 @@
-"""AIL-SVRG-ADMM and its shared ablation core."""
+"""AILSVRG-ADMM and its shared ablation core."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ def cost_matched_probability(max_iter: int, *, varrho: float, p_min: float) -> f
     return float(np.mean(probabilities))
 
 
-def _run_ail_svrg_core(
+def _run_ailsvrg_core(
     X_train: sparse.spmatrix,
     labels_train: np.ndarray,
     X_test: sparse.spmatrix,
@@ -86,9 +86,9 @@ def _run_ail_svrg_core(
     p_min_setting = config.get("p_min", "inverse_n")
     p_min = resolve_p_min(p_min_setting, n=n, batch_size=batch_size)
     if not 0.0 <= tau < 1.0:
-        raise ValueError("AIL-SVRG-ADMM tau must belong to [0, 1).")
+        raise ValueError("AILSVRG-ADMM tau must belong to [0, 1).")
     if varrho <= 0.0 or beta_y < 0.0:
-        raise ValueError("AIL-SVRG-ADMM varrho must be positive and beta_y nonnegative.")
+        raise ValueError("AILSVRG-ADMM varrho must be positive and beta_y nonnegative.")
 
     fixed_setting = config.get("fixed_probability")
     if fixed_setting == "cost_matched":
@@ -195,7 +195,7 @@ def _run_ail_svrg_core(
     )
 
 
-def run_ail_svrg_admm(
+def run_ailsvrg_admm(
     X_train: sparse.spmatrix,
     labels_train: np.ndarray,
     X_test: sparse.spmatrix,
@@ -205,8 +205,8 @@ def run_ail_svrg_admm(
     config: dict[str, Any],
     seed: int,
     *,
-    name: str = "AIL-SVRG-ADMM",
+    name: str = "AILSVRG-ADMM",
 ) -> RunResult:
-    return _run_ail_svrg_core(
+    return _run_ailsvrg_core(
         X_train, labels_train, X_test, labels_test, D, f_star, config, seed, name=name
     )
